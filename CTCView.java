@@ -440,23 +440,111 @@ public class CTCView extends JFrame
     }
     private class TrackPanel extends JPanel
     {
+        private JLabel trackLabel = new JLabel("Select Track");
+        private JLabel speedLimitLabel = new JLabel("Speed Limit");
+        private JLabel elevationLabel = new JLabel("Elevation");
+        private JLabel gradeLabel = new JLabel("Grade");
+        private JLabel blockSizeLabel = new JLabel("Block Size");
+        private JLabel trackTypeLabel = new JLabel("Track Type");
+        private JLabel passengersBoardingLabel = new JLabel("Passengers Boarding");
+        private JLabel passengersDisembarkingLabel = new JLabel("Passengers Disembarking");
+        private JComboBox track = new JComboBox();
+        private JComboBox failType = new JComboBox();
+        private JTextField speedLimitField = new JTextField();
+        private JTextField elevationField = new JTextField();
+        private JTextField gradeField = new JTextField();
+        private JTextField blockSizeField = new JTextField();
+        private JTextField trackTypeField = new JTextField();
+        private JTextField passengersBoardingField = new JTextField();
+        private JTextField passengersDisembarkingField = new JTextField();
+        private JButton closeButton = new JButton("Close");
+        private JButton openButton = new JButton("Open");
+        private JButton breakButton = new JButton("Break");
+        private JButton fixButton = new JButton("Fix");
+        private Insets insets = new Insets(5,20,0,20);
+        
+        TrackPanel()
+        {
+            this.setLayout(new GridBagLayout());
+            initialize();
+        }
+
+        private void initialize()
+        {
+            speedLimitField.setColumns(10);
+            elevationField.setColumns(10);
+            gradeField.setColumns(10);
+            blockSizeField.setColumns(10);
+            trackTypeField.setColumns(10);
+            passengersBoardingField.setColumns(10);
+            passengersDisembarkingField.setColumns(10);
+            
+            addComponent(this, trackLabel, 0, 0, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, track, 1, 0, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+            addComponent(this, speedLimitLabel, 0, 1, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, speedLimitField, 1, 1, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, elevationLabel, 0, 2, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, elevationField, 1, 2, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, gradeLabel, 0, 3, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, gradeField, 1, 3, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, blockSizeLabel, 0, 4, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, blockSizeField, 1, 4, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, trackTypeLabel, 0, 5, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, trackTypeField, 1, 5, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, passengersBoardingLabel, 0, 6, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, passengersBoardingField, 1, 6, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, passengersDisembarkingLabel, 0, 7, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, passengersDisembarkingField, 1, 7, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, closeButton, 0, 8, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, openButton, 0, 9, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, breakButton, 0, 10, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, failType, 1, 10, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+            addComponent(this, fixButton, 0, 11, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+        }
         
         public void paintComponent(Graphics g)
         {
             int width = getWidth();
             int height = getHeight();
-            g.setColor(Color.ORANGE);
+            g.setColor(Color.WHITE);
             g.fillRect(0,0, width, height);
         }
     }
     private class MetricsPanel extends JPanel
     {
+        private JLabel throughputLabel = new JLabel("Throughput");
+        private JLabel capacityLabel = new JLabel("Capacity");
+        private JLabel occupancyLabel = new JLabel("Occupancy");
+        private JTextField throughputField = new JTextField();
+        private JTextField capacityField = new JTextField();
+        private JTextField occupancyField = new JTextField();
+        private Insets insets = new Insets(5,20,0,20);
+        
+        MetricsPanel()
+        {
+            this.setLayout(new GridBagLayout());
+            initialize();
+        }
+
+        private void initialize()
+        {
+            throughputField.setColumns(10);
+            capacityField.setColumns(10);
+            occupancyField.setColumns(10);
+            
+            addComponent(this, throughputLabel, 0, 0, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, throughputField, 1, 0, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, capacityLabel, 0, 1, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, capacityField, 1, 1, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, occupancyLabel, 0, 2, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, occupancyField, 1, 2, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+        }
         
         public void paintComponent(Graphics g)
         {
             int width = getWidth();
             int height = getHeight();
-            g.setColor(Color.YELLOW);
+            g.setColor(Color.WHITE);
             g.fillRect(0,0, width, height);
         }
     }
