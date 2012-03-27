@@ -12,6 +12,8 @@ public class CTCControl
 {
     private int authority;
     private int setpoint;
+    private int operatorSpeed;
+    private boolean operatorBrake;
     
     CTCControl()
     {
@@ -22,6 +24,13 @@ public class CTCControl
     {
         setpoint = sp;
         authority = auth;
-        System.out.println("Setpoint: " + setpoint + "   Authority:  " + authority);
+        //System.out.println("Setpoint: " + setpoint + "   Authority:  " + authority);
+    }
+    
+    public void setOperatorCommands(int sp, boolean b)
+    {
+        operatorSpeed = sp;
+        operatorBrake = b;
+        //System.out.println("Operator Speed : " + operatorSpeed + " Brake: " + operatorBrake);
     }
 }

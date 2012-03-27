@@ -67,7 +67,6 @@ public class LogInDialog extends JDialog
                         "Login",
                     JOptionPane.INFORMATION_MESSAGE);
                     verifiedUsername = getUsername();
-System.out.println(verifiedUsername);
                     succeeded = true;
                     dispose();
                 } 
@@ -95,16 +94,16 @@ System.out.println(verifiedUsername);
             }
         });
         
-            JPanel bp = new JPanel();
-            bp.add(btnLogin);
-            bp.add(btnCancel);
+        JPanel bp = new JPanel();
+        bp.add(btnLogin);
+        bp.add(btnCancel);
 
-            getContentPane().add(panel, BorderLayout.CENTER);
-            getContentPane().add(bp, BorderLayout.PAGE_END);
+        getContentPane().add(panel, BorderLayout.CENTER);
+        getContentPane().add(bp, BorderLayout.PAGE_END);
 
-            pack();
-            setResizable(false);
-            //setLocationRelativeTo(parent);
+        pack();
+        setResizable(false);
+        //setLocationRelativeTo(parent);
     }
 
     public String getVerifiedUsername()
