@@ -4,20 +4,17 @@
  */
 package CTC;
 
-/**
- *
- * @author AM
- */
 public class CTCControl 
 {
     private int authority;
     private int setpoint;
     private int operatorSpeed;
     private boolean operatorBrake;
+    private CTCModel model;
     
-    CTCControl()
+    CTCControl(CTCModel m)
     {
-        
+        model = m;
     }
     
     public void setCommands(int sp, int auth)
@@ -32,5 +29,10 @@ public class CTCControl
         operatorSpeed = sp;
         operatorBrake = b;
         //System.out.println("Operator Speed : " + operatorSpeed + " Brake: " + operatorBrake);
+    }
+    
+    public void createTrain()
+    {
+        
     }
 }

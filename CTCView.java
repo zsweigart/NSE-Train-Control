@@ -4,19 +4,17 @@
  */
 package CTC;
 
-/**
- *
- * @author AM
- */
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import Simulator.Simulator;
 
 public class CTCView extends JFrame
 {
-    private CTCControl control = new CTCControl();
     private CTCModel model = new CTCModel();
+    private CTCControl control = new CTCControl(model);
+    private Simulator sim;
     private boolean isOpen = true;
     private int clockRate = 60;
     private boolean demoMode = false;
@@ -28,9 +26,12 @@ public class CTCView extends JFrame
     private MetricsPanel metricsPanel = new MetricsPanel();
     private SplashPanel splashPanel = new SplashPanel();
     private String dispatcherID;
+    private int blockSelectedIndex;
+    private int trainSelectedIndex;
     
-    public CTCView()
+    public CTCView()//SimulatorPrototype3 s)
     {
+        //simulator = s;
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         intialize();
         setLayout(new BorderLayout());
@@ -74,6 +75,18 @@ public class CTCView extends JFrame
         viewTrain.addActionListener(new MenuOpenScreen(trainPanel));
         viewTrack.addActionListener(new MenuOpenScreen(trackPanel));
         viewMetrics.addActionListener(new MenuOpenScreen(metricsPanel));
+        runDemo.addActionListener(new MenuActionRunDemo());
+    }
+    
+    private class MenuActionRunDemo implements ActionListener
+    {
+        private MenuActionRunDemo() {}
+        
+        @Override
+        public void actionPerformed(ActionEvent e) 
+        {
+            demoMode = true;
+        }
     }
     
     private class MenuActionClose implements ActionListener 
@@ -135,9 +148,47 @@ public class CTCView extends JFrame
     
     private void changePanel(JPanel panel) 
     {
+        if(panel instanceof MainPanel)
+        {
+            ((MainPanel)panel).initialize();
+        }
+        else
+        {
+            if(panel instanceof DispatcherPanel)
+            {
+                ((DispatcherPanel)panel).initialize();
+            }
+            else
+            {
+                if(panel instanceof OperatorPanel)
+                {
+                    ((OperatorPanel)panel).initialize();
+                }  
+                else
+                {
+                    if(panel instanceof TrainPanel)
+                    {
+                        ((TrainPanel)panel).initialize();
+                    }
+                    else
+                    {
+                        if(panel instanceof TrackPanel)
+                        {
+                            ((TrackPanel)panel).initialize();
+                        } 
+                        else
+                        {
+                            if(panel instanceof MetricsPanel)
+                            {
+                                ((MetricsPanel)panel).initialize();
+                            }   
+                        }
+                    }
+                }
+            }
+        }
         getContentPane().removeAll();
         getContentPane().add(panel);
-        //getContentPane().doLayout();
         getContentPane().validate();
         update(getGraphics());
     }
@@ -148,7 +199,7 @@ public class CTCView extends JFrame
         private JLabel clockLabel = new JLabel("Clock Rate (1 hr = )");
         private final String clockRates [] = {"15 minutes", "20 minutes", "30 minutes", "40 minutes", "45 minutes", "60 minutes", "90 minutes", "120 minutes"};
         private JComboBox clockCombo= new JComboBox(clockRates);
-        private Insets insets = new Insets(0,0,0,0);
+        private Insets insets = new Insets(0,10,0,0);
 
         MainPanel()
         {
@@ -239,7 +290,7 @@ public class CTCView extends JFrame
             addComponent(this, map, 0, 0, 3, 1, 1.0, 1.0, insets, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
             addComponent(this, dispatcherIDLabel, 0, 1, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
             addComponent(this, trainID, 0, 2, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
-            addComponent(this, trains, 1, 2, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, trains, 1, 2, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.BOTH);
             addComponent(this, setpointLabel, 0, 3, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
             addComponent(this, setpoint, 1, 3, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);      
             addComponent(this, authorityLabel, 0, 4, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
@@ -268,6 +319,7 @@ public class CTCView extends JFrame
             g.fillRect(0,0, width, height);
         }
     }
+    
     private class OperatorPanel extends JPanel
     {
         private MapPanel map = new MapPanel(model);
@@ -290,9 +342,10 @@ public class CTCView extends JFrame
         {
             operatorSpeed.setColumns(10);
             send.addActionListener(buttonClick);
+            
             addComponent(this, map, 0, 0, 3, 1, 1.0, 1.0, insets, GridBagConstraints.CENTER, GridBagConstraints.BOTH);
             addComponent(this, trainID, 0, 1, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
-            addComponent(this, trains, 1, 1, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, trains, 1, 1, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.BOTH);
             addComponent(this, speedLabel, 0, 2, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
             addComponent(this, operatorSpeed, 1, 2, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
             addComponent(this, brakeLabel, 0, 3, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
@@ -321,11 +374,14 @@ public class CTCView extends JFrame
             g.fillRect(0,0, width, height);
         }
     }
+    
     private class TrainPanel extends JPanel
     {
+        private String [] lines = {"Green", "Red"};
+        private String [] trainYards = {"", "Train Yard 1"};
         private JLabel currentTrainsLabel = new JLabel("Current Trains");
         private JLabel trainYardSelectLabel = new JLabel("Add new train from train yard: ");
-        private JLabel nextDestinationLabel = new JLabel("Next Destination");
+        private JLabel lineLabel = new JLabel("Line");
         private JLabel heightLabel = new JLabel("Height");
         private JLabel widthLabel = new JLabel("Width");
         private JLabel numCarsLabel = new JLabel("Number of Cars");
@@ -336,15 +392,16 @@ public class CTCView extends JFrame
         private JLabel currentSpeedLabel = new JLabel("Current Speed");
         private JLabel currentAccelerationLabel = new JLabel("Current Acceleration");
         private JLabel messageLabel = new JLabel("Message Displayed");
-        private JLabel lightLabel = new JLabel("Lights on");
+        private JLabel headlightLabel = new JLabel("Headlights on");
+        private JLabel cabinLightLabel = new JLabel("Cabin Lights on");
         private JLabel doorLabel = new JLabel("Doors Open");
         private JLabel brakeFailLabel = new JLabel("Brake Failure");
         private JLabel engineFailLabel = new JLabel("Engine Failure");
         private JLabel signalPickupFailLabel = new JLabel("Signal Pickup Failure");
         private JLabel trainIDLabel = new JLabel("Train ID");
         private JComboBox currentTrains = new JComboBox();
-        private JComboBox trainYard = new JComboBox();
-        private JComboBox nextDestination = new JComboBox();
+        private JComboBox trainYard = new JComboBox(trainYards);
+        private JComboBox line = new JComboBox(lines);
         private JTextField heightField = new JTextField();
         private JTextField widthField = new JTextField();
         private JTextField numCarsField = new JTextField();
@@ -356,7 +413,8 @@ public class CTCView extends JFrame
         private JTextField currentAccelerationField = new JTextField();
         private JTextField messageField = new JTextField();
         private JTextField trainIDField = new JTextField();
-        private JCheckBox lightCheck = new JCheckBox();
+        private JCheckBox headlightCheck = new JCheckBox();
+        private JCheckBox cabinLightCheck = new JCheckBox();
         private JCheckBox doorCheck = new JCheckBox();
         private JCheckBox brakeFailCheck = new JCheckBox();
         private JCheckBox engineFailCheck = new JCheckBox();
@@ -365,6 +423,23 @@ public class CTCView extends JFrame
         private JButton addTrainButton = new JButton("Add Train");
         private JButton removeTrainButton = new JButton("Remove Train");
         private Insets insets = new Insets(5,20,0,20);
+        private int height;
+        private int width;
+        private int numCars;
+        private int length;
+        private int mass;
+        private int crewCount;
+        private int passCount;
+        private int currentSpeed;
+        private int currentAcceleration;
+        private String message;
+        private boolean cabinLights;
+        private boolean headlights;
+        private boolean doors;
+        private boolean brakeFailure;
+        private boolean engineFailure;
+        private boolean signalFailure;
+        private int lineIndex;
         
         TrainPanel()
         {
@@ -374,6 +449,15 @@ public class CTCView extends JFrame
 
         private void initialize()
         {
+            String trainIDs [] = model.getTrainIDs();
+            currentTrains.addItem("");
+            for(int i = 0; i < trainIDs.length; i++)
+            {
+                currentTrains.addItem(trainIDs[i]);
+            }
+            currentTrains.setSelectedIndex(trainSelectedIndex);
+            line.setSelectedIndex(lineIndex);
+            
             heightField.setColumns(10);
             widthField.setColumns(10);
             numCarsField.setColumns(10);
@@ -386,14 +470,53 @@ public class CTCView extends JFrame
             messageField.setColumns(10);
             trainIDField.setColumns(10);
             
+            heightField.setEditable(false);
+            widthField.setEditable(false);
+            numCarsField.setEditable(false);
+            lengthField.setEditable(false);
+            massField.setEditable(false);
+            crewCountField.setEditable(false);
+            passengerCountField.setEditable(false);
+            currentSpeedField.setEditable(false);
+            currentAccelerationField.setEditable(false);
+            messageField.setEditable(false);
+            trainIDField.setEditable(false);
+            cabinLightCheck.setEnabled(false);
+            headlightCheck.setEnabled(false);
+            doorCheck.setEnabled(false);
+            
+            heightField.setText("" + height);
+            widthField.setText("" + width);
+            numCarsField.setText("" + numCars);
+            lengthField.setText("" + length);
+            massField.setText("" + mass);
+            crewCountField.setText("" + crewCount);
+            passengerCountField.setText("" + passCount);
+            currentSpeedField.setText("" + currentSpeed);
+            currentAccelerationField.setText("" + currentAcceleration);
+            if(message == null)
+            {
+                messageField.setText("");
+            }
+            else
+            {
+                messageField.setText("" + message);
+            }
+            cabinLightCheck.setSelected(cabinLights);
+            headlightCheck.setSelected(headlights);
+            doorCheck.setSelected(doors);
+            brakeFailCheck.setSelected(brakeFailure);
+            engineFailCheck.setSelected(engineFailure);
+            signalPickupFailCheck.setSelected(signalFailure);
+                       
             addComponent(this, currentTrainsLabel, 0, 0, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
             addComponent(this, currentTrains, 1, 0, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.BOTH);
             addComponent(this, trainYardSelectLabel, 2, 0, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
             addComponent(this, trainYard, 3, 0, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.BOTH);
             addComponent(this, trainIDLabel, 2, 1, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
             addComponent(this, trainIDField, 3, 1, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
-            addComponent(this, nextDestinationLabel, 0, 2, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
-            addComponent(this, nextDestination, 1, 2, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+            addComponent(this, lineLabel, 0, 2, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, line, 1, 2, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.BOTH);
             addComponent(this, heightLabel, 0, 3, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
             addComponent(this, heightField, 1, 3, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
             addComponent(this, widthLabel, 0, 4, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
@@ -414,21 +537,71 @@ public class CTCView extends JFrame
             addComponent(this, currentAccelerationField, 1, 11, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
             addComponent(this, messageLabel, 0, 12, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
             addComponent(this, messageField, 1, 12, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
-            addComponent(this, lightLabel, 0, 13, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
-            addComponent(this, lightCheck, 1, 13, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
-            addComponent(this, doorLabel, 0, 14, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
-            addComponent(this, doorCheck, 1, 14, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
-            addComponent(this, brakeFailLabel, 0, 15, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
-            addComponent(this, brakeFailCheck, 1, 15, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
-            addComponent(this, engineFailLabel, 0, 16, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
-            addComponent(this, engineFailCheck, 1, 16, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
-            addComponent(this, signalPickupFailLabel, 0, 17, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
-            addComponent(this, signalPickupFailCheck, 1, 17, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
-            addComponent(this, emergencyBrakeButton, 1, 18, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
-            addComponent(this, addTrainButton, 2, 18, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
-            addComponent(this, removeTrainButton, 3, 18, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, cabinLightLabel, 0, 13, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, cabinLightCheck, 1, 13, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, headlightLabel, 0, 14, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, headlightCheck, 1, 14, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, doorLabel, 0, 15, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, doorCheck, 1, 15, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, brakeFailLabel, 0, 16, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, brakeFailCheck, 1, 16, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, engineFailLabel, 0, 17, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, engineFailCheck, 1, 17, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, signalPickupFailLabel, 0, 18, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, signalPickupFailCheck, 1, 18, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
+            addComponent(this, emergencyBrakeButton, 1, 19, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, addTrainButton, 2, 19, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
+            addComponent(this, removeTrainButton, 3, 19, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
             
         }
+        
+        ActionListener trainComboListener = new ActionListener()
+        {
+            public void actionPerformed(ActionEvent event)
+            {
+                JComboBox cb = (JComboBox)event.getSource();
+                String ID = (String)cb.getSelectedItem();
+                trainSelectedIndex = (int)cb.getSelectedIndex();
+                //TrainController t = sim.getTrainController(ID);
+                //get all train properties
+                //initialize();
+            }
+        };
+        
+        ActionListener emergencyBrakeButtonListener = new ActionListener()
+        {
+            public void actionPerformed(ActionEvent event)
+            {
+                JComboBox cb = (JComboBox)event.getSource();
+                String ID = (String)cb.getSelectedItem();
+                //TrainController t = sim.getTrainController(ID);
+                //t.emergencyBrake();
+                //initialize();
+            }
+        };
+                
+        ActionListener addTrainButtonListener = new ActionListener()
+        {
+            public void actionPerformed(ActionEvent event)
+            {
+                JComboBox cb = (JComboBox)event.getSource();
+                String ID = (String)cb.getSelectedItem();
+                //sim.createTrain(t attributes);
+                //initialize();
+            }
+        };
+                        
+        ActionListener removeTrainButtonListener = new ActionListener()
+        {
+            public void actionPerformed(ActionEvent event)
+            {
+                JComboBox cb = (JComboBox)event.getSource();
+                String ID = (String)cb.getSelectedItem();
+                //TrainController t = model.getTrainController(ID);
+                //t.remove();
+                //initialize();
+            }
+        };
         
         public void paintComponent(Graphics g)
         {
@@ -438,8 +611,10 @@ public class CTCView extends JFrame
             g.fillRect(0,0, width, height);
         }
     }
+    
     private class TrackPanel extends JPanel
     {
+        private String [] failureTypes = {"Broken Rail", "Power Failure", "Circuit Failure"};
         private JLabel trackLabel = new JLabel("Select Track");
         private JLabel speedLimitLabel = new JLabel("Speed Limit");
         private JLabel elevationLabel = new JLabel("Elevation");
@@ -449,7 +624,7 @@ public class CTCView extends JFrame
         private JLabel passengersBoardingLabel = new JLabel("Passengers Boarding");
         private JLabel passengersDisembarkingLabel = new JLabel("Passengers Disembarking");
         private JComboBox track = new JComboBox();
-        private JComboBox failType = new JComboBox();
+        private JComboBox failType = new JComboBox(failureTypes);
         private JTextField speedLimitField = new JTextField();
         private JTextField elevationField = new JTextField();
         private JTextField gradeField = new JTextField();
@@ -462,7 +637,14 @@ public class CTCView extends JFrame
         private JButton breakButton = new JButton("Break");
         private JButton fixButton = new JButton("Fix");
         private Insets insets = new Insets(5,20,0,20);
-        
+        private int speedLimit;
+        private int elevation;
+        private int grade;
+        private int blockSize;
+        private int trackType;
+        private int passengersBoarding;
+        private int passengersDisembarking;
+                
         TrackPanel()
         {
             this.setLayout(new GridBagLayout());
@@ -471,6 +653,19 @@ public class CTCView extends JFrame
 
         private void initialize()
         {
+            String trackIDs [] = model.getTrackIDs();
+            for(int i = 0; i < trackIDs.length; i++)
+            {
+                track.addItem(trackIDs[i]);
+            }
+            track.setSelectedIndex(blockSelectedIndex);
+            
+            track.addActionListener(trackComboListener);
+            closeButton.addActionListener(closeButtonListener);
+            openButton.addActionListener(openButtonListener);
+            breakButton.addActionListener(breakButtonListener);
+            fixButton.addActionListener(fixButtonListener);
+                        
             speedLimitField.setColumns(10);
             elevationField.setColumns(10);
             gradeField.setColumns(10);
@@ -478,6 +673,23 @@ public class CTCView extends JFrame
             trackTypeField.setColumns(10);
             passengersBoardingField.setColumns(10);
             passengersDisembarkingField.setColumns(10);
+            
+            speedLimitField.setEditable(false);
+            elevationField.setEditable(false);
+            gradeField.setEditable(false);
+            blockSizeField.setEditable(false);
+            trackTypeField.setEditable(false);
+            passengersBoardingField.setEditable(false);
+            passengersDisembarkingField.setEditable(false);
+            
+            speedLimitField.setText(""+speedLimit);
+            elevationField.setText(""+elevation);
+            gradeField.setText(""+grade);
+            blockSizeField.setText(""+blockSize);
+            trackTypeField.setText(""+trackType);
+            passengersBoardingField.setText(""+passengersBoarding);
+            passengersDisembarkingField.setText(""+passengersDisembarking);
+            
             
             addComponent(this, trackLabel, 0, 0, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
             addComponent(this, track, 1, 0, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.BOTH);
@@ -502,6 +714,68 @@ public class CTCView extends JFrame
             addComponent(this, fixButton, 0, 11, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
         }
         
+        ActionListener trackComboListener = new ActionListener()
+        {
+            public void actionPerformed(ActionEvent event)
+            {
+                JComboBox cb = (JComboBox)event.getSource();
+                String ID = (String)cb.getSelectedItem();
+                blockSelectedIndex = (int)cb.getSelectedIndex();
+                //Track t = model.getTrack(ID);
+                //get all track properties
+                //initialize();
+            }
+        };
+        
+        ActionListener closeButtonListener = new ActionListener()
+        {
+            public void actionPerformed(ActionEvent event)
+            {
+                JComboBox cb = (JComboBox)event.getSource();
+                String ID = (String)cb.getSelectedItem();
+                //Track t = model.getTrack();
+                //track.close();
+                //initialize();
+            }
+        };
+        
+        ActionListener openButtonListener = new ActionListener()
+        {
+            public void actionPerformed(ActionEvent event)
+            {
+                JComboBox cb = (JComboBox)event.getSource();
+                String ID = (String)cb.getSelectedItem();
+                //Track t = model.getTrack();
+                //track.open();
+                //initialize();
+            }
+        };
+        
+        ActionListener breakButtonListener = new ActionListener()
+        {
+            public void actionPerformed(ActionEvent event)
+            {
+                JComboBox cb = (JComboBox)event.getSource();
+                String ID = (String)cb.getSelectedItem();
+                String type = (String)failType.getSelectedItem();
+                //Track t = model.getTrack();
+                //track.fail(type);
+                //initialize();
+            }
+        };
+        
+        ActionListener fixButtonListener = new ActionListener()
+        {
+            public void actionPerformed(ActionEvent event)
+            {
+                JComboBox cb = (JComboBox)event.getSource();
+                String ID = (String)cb.getSelectedItem();
+                //Track t = model.getTrack();
+                //track.fix();
+                //initialize();
+            }
+        };
+        
         public void paintComponent(Graphics g)
         {
             int width = getWidth();
@@ -510,6 +784,7 @@ public class CTCView extends JFrame
             g.fillRect(0,0, width, height);
         }
     }
+    
     private class MetricsPanel extends JPanel
     {
         private JLabel throughputLabel = new JLabel("Throughput");
@@ -532,6 +807,14 @@ public class CTCView extends JFrame
             capacityField.setColumns(10);
             occupancyField.setColumns(10);
             
+            throughputField.setEditable(false);
+            capacityField.setEditable(false);
+            occupancyField.setEditable(false);
+            
+            throughputField.setText("" + model.getThroughput());
+            capacityField.setText("" + model.getCapacity());
+            occupancyField.setText("" + model.getOccupancy());
+            
             addComponent(this, throughputLabel, 0, 0, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
             addComponent(this, throughputField, 1, 0, 1, 1, 0, 0, insets, GridBagConstraints.WEST, GridBagConstraints.NONE);
             addComponent(this, capacityLabel, 0, 1, 1, 1, 0, 0, insets, GridBagConstraints.EAST, GridBagConstraints.NONE);
@@ -548,6 +831,7 @@ public class CTCView extends JFrame
             g.fillRect(0,0, width, height);
         }
     }
+    
     private class SplashPanel extends JPanel
     {
         
@@ -555,12 +839,14 @@ public class CTCView extends JFrame
         {
             int width = getWidth();
             int height = getHeight();
+            Font f = new Font(Font.MONOSPACED, Font.BOLD, 30);
             g.setColor(Color.WHITE);
             g.fillRect(0,0, width, height);
+            g.setColor(Color.BLACK);
+            g.setFont(f);
+            g.drawString("Alpha Train Simulator", width/4, height/3);
         }
     }
-    
-    
     
     private void addComponent(Container c, Component comp, int gridx, int gridy, int gridwidth, int gridheight, double weightx, double weighty, Insets i, int anchor, int fill)
     {
@@ -582,4 +868,10 @@ public class CTCView extends JFrame
     {
         return isOpen;
     }
+    
+    public void setSimulator(Simulator s)
+    {
+        sim = s;
+    }
+    
 }
